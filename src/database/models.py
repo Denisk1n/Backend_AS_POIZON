@@ -2,7 +2,7 @@ import datetime
 from typing import Annotated
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, TIMESTAMP, text
 from sqlalchemy.orm import relationship, Mapped, mapped_column # помогает для использования типов
-from database import Base
+from src.database.engine_db import Base
 import enum
 
 
@@ -10,12 +10,9 @@ import enum
 intpk = Annotated[int, mapped_column(primary_key=True)]
 intfk = Annotated[int, mapped_column(ForeignKey("sneakers.id", ondelete="CASCADE"))]
 created_at = Annotated[
-   datetime.datetime,
-   mapped_column(
-      TIMESTAMP(
-         timezone=False,
-         server_default=text("CURRENT_TIMESTAMP(0)")
-      )
+   datetime.datetime, mapped_column(
+      TIMESTAMP(timezone=False),
+      server_default=text("CURRENT_TIMESTAMP(0)")
    )
 ]
 
@@ -34,7 +31,7 @@ class SneakersOrm(Base):
    description: Mapped[str]
    price: Mapped[int]
    main_image: Mapped[str]
-   available: Mapped[Availability]
+   available: Mapped[str]
    created_at: Mapped[created_at]
    
    images_sneaker: Mapped[list["Images_sneakerOrm"]] = relationship(
