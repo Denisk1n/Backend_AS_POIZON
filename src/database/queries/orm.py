@@ -1,8 +1,8 @@
-from src.database.engine_db import sync_engine, session_factory
+from database.engine_db import sync_engine, session_factory
 from sqlalchemy import Integer, and_, cast, func, text, insert, select, update
 from sqlalchemy.orm import aliased, joinedload, selectinload
-from src.database.models import Base, SneakersOrm, Images_sneakerOrm, Sizes_sneakerOrm
-from src.schemas.productcardmodel import SneakerProductCardDTO, SneakersRelationDTO
+from database.models import Base, SneakersOrm, Images_sneakerOrm, Sizes_sneakerOrm
+from schemas.productcardmodel import SneakerProductCardDTO, SneakersRelationDTO
 
 sneakers_data = [
     {
@@ -117,9 +117,9 @@ class SyncOrm:
          
          result_dto = [SneakerProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
       
-         print(f"{result_dto=}")
+         # print(f"{result_dto=}")
+         return result_dto
          
-   
    @staticmethod
    def selectProductInfo():
       with session_factory() as session:
@@ -132,11 +132,12 @@ class SyncOrm:
 
          result = session.execute(query)
          sneakers = result.scalars().all()
-         print(f"{sneakers}")
+         # print(f"{sneakers}")
          
          result_dto = [SneakersRelationDTO.model_validate(row, from_attributes=True) for row in sneakers]
       
-         print(f"{result_dto=}")
+         # print(f"{result_dto=}")
+         return result_dto
 
  
 

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase  
 from sqlalchemy import create_engine, text 
-from src.database.config import settings
+from database.config import settings
 
 
 # создаем движок для работы с БД

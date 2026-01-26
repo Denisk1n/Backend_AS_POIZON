@@ -2,7 +2,7 @@ import datetime
 from typing import Annotated
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, TIMESTAMP, text
 from sqlalchemy.orm import relationship, Mapped, mapped_column # помогает для использования типов
-from src.database.engine_db import Base
+from database.engine_db import Base
 import enum
 
 
