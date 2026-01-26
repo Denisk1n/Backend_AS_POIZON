@@ -2,7 +2,7 @@ from src.database.engine_db import sync_engine, session_factory
 from sqlalchemy import Integer, and_, cast, func, text, insert, select, update
 from sqlalchemy.orm import aliased, joinedload, selectinload
 from src.database.models import Base, SneakersOrm, Images_sneakerOrm, Sizes_sneakerOrm
-
+from src.schemas.productcardmodel import SneakerProductCardDTO, SneakersRelationDTO
 
 sneakers_data = [
     {
@@ -60,6 +60,7 @@ sizes_sneaker_data = [
     { "sneaker_id": 3, "ru_size": 42, "us_size": 9, "sm_size": 27}
 ]
 
+
 class SyncOrm:
    
    @staticmethod
@@ -96,5 +97,50 @@ class SyncOrm:
       
       session.add_all(sizes_instances)
       session.commit()
+      
+   @staticmethod
+   def selectProductCard():
+      with session_factory() as session:
+         
+         query = select(
+            SneakersOrm.id,
+            SneakersOrm.title,
+            SneakersOrm.brand,
+            SneakersOrm.price,
+            SneakersOrm.main_image,
+            SneakersOrm.available
+            )
+
+         result = session.execute(query)
+         sneakers = result.all()
+         # print(f"{sneakers}")
+         
+         result_dto = [SneakerProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+      
+         print(f"{result_dto=}")
+         
+   
+   @staticmethod
+   def selectProductInfo():
+      with session_factory() as session:
+         
+         query = (
+            select(SneakersOrm)
+            .options(selectinload(SneakersOrm.images_sneaker))
+            .options(selectinload(SneakersOrm.sizes_sneaker))
+         )
+
+         result = session.execute(query)
+         sneakers = result.scalars().all()
+         print(f"{sneakers}")
+         
+         result_dto = [SneakersRelationDTO.model_validate(row, from_attributes=True) for row in sneakers]
+      
+         print(f"{result_dto=}")
+
+ 
+
+
+
 
          

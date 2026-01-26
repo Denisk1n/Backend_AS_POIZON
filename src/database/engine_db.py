@@ -7,7 +7,7 @@ from src.database.config import settings
 # создаем движок для работы с БД
 sync_engine = create_engine(
    url=settings.DATABASE_URL_psycopg,
-   echo=True,
+   echo=False,
    pool_size=5,
    max_overflow=10
 )
