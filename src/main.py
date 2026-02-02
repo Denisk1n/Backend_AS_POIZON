@@ -10,13 +10,18 @@ app.add_middleware(
    allow_origins=['*']
 )
 
+
 @app.get("/sneakers", summary="Информация на карточке товара")
 def get_all_sneakers_card():
    return SyncOrm.selectProductCard()
 
-@app.get("/sneakers-info", summary="Полная информация о кроссовках")
-def get_all_sneakers_card_info():
-   return SyncOrm.selectProductInfo()
+
+
+
+@app.get("/sneakers/{id}", summary="Полная информация о кроссовках")
+def get_SneakerCard(id: int):
+   return SyncOrm.selectProductInfo(id)
+
 
 
 if __name__ == "__main__":

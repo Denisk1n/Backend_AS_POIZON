@@ -9,12 +9,9 @@ import enum
 # Создаем кастомные типы данных
 intpk = Annotated[int, mapped_column(primary_key=True)]
 intfk = Annotated[int, mapped_column(ForeignKey("sneakers.id", ondelete="CASCADE"))]
-created_at = Annotated[
-   datetime.datetime, mapped_column(
-      TIMESTAMP(timezone=False),
-      server_default=text("CURRENT_TIMESTAMP(0)")
-   )
-]
+created_at = Annotated[datetime.datetime, mapped_column(default=datetime.datetime.now())]
+updated_at = Annotated[datetime.datetime, mapped_column(default=datetime.datetime.now())]
+
 
 # енумиратор 
 class Availability(enum.Enum):
@@ -28,43 +25,51 @@ class SneakersOrm(Base):
    id: Mapped[intpk]
    title: Mapped[str]
    brand: Mapped[str]
+   category: Mapped[str]
    description: Mapped[str]
    price: Mapped[int]
    main_image: Mapped[str]
    available: Mapped[str]
    created_at: Mapped[created_at]
+   updated_at: Mapped[created_at]
    
-   images_sneaker: Mapped[list["Images_sneakerOrm"]] = relationship(
+   images: Mapped[list["ImagesOrm"]] = relationship(
       back_populates="sneaker"
    )
    
-   sizes_sneaker: Mapped[list["Sizes_sneakerOrm"]] = relationship(
+   sizes: Mapped[list["SneakerSizesOrm"]] = relationship(
       back_populates="sneaker"
    )
    
 
 
-class Images_sneakerOrm(Base):
-   __tablename__ = "images_sneaker"
+class ImagesOrm(Base):
+   __tablename__ = "images"
    id: Mapped[intpk]
    sneaker_id: Mapped[intfk]
-   sneaker_image: Mapped[str]
+   position: Mapped[int]
+   image: Mapped[str]
+   created_at: Mapped[created_at]
+   updated_at: Mapped[created_at]
    
    sneaker: Mapped["SneakersOrm"] = relationship(
-      back_populates="images_sneaker"
+      back_populates="images"
    )
    
    
    
-class Sizes_sneakerOrm(Base):
-   __tablename__ = "sizes_sneaker"
+class SneakerSizesOrm(Base):
+   __tablename__ = "sneakersizes"
    id: Mapped[intpk]
    sneaker_id: Mapped[intfk]
-   ru_size: Mapped[int]
-   us_size: Mapped[int]
-   sm_size: Mapped[int]
+   ru: Mapped[float]
+   us: Mapped[float]
+   sm: Mapped[float]
+   
+   created_at: Mapped[created_at]
+   updated_at: Mapped[created_at]
    
    sneaker: Mapped["SneakersOrm"] = relationship(
-      back_populates="sizes_sneaker"
+      back_populates="sizes"
    )
    
