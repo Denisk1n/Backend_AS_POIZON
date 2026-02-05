@@ -4,7 +4,7 @@ from datetime import datetime
 import math
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
-from database.queries.orm import SyncOrm, sneakers_data
+from database.queries.orm import SyncOrm
 
 
 # SyncOrm.create_tables()
@@ -17,5 +17,5 @@ from database.queries.orm import SyncOrm, sneakers_data
 
 # SyncOrm.selectProductInfo()
 
-
+#SyncOrm.selectProductCardsWithFilters()
 

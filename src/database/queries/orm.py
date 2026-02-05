@@ -1,8 +1,9 @@
 from database.engine_db import sync_engine, session_factory
-from sqlalchemy import Integer, and_, cast, func, text, insert, select, update
-from sqlalchemy.orm import aliased, joinedload, selectinload
+from sqlalchemy import Integer, and_, or_, func, text, insert, select, update
+from sqlalchemy.orm import aliased, joinedload, selectinload, join
 from database.models import Base, SneakersOrm, ImagesOrm, SneakerSizesOrm
-from schemas.productcardmodel import SneakerProductCardDTO, SneakersRelationDTO, SneakersViewRelationDTO
+from schemas.filtersmodel import FilterModelDTO
+from schemas.productcardmodel import ProductCardDTO, SneakersRelationDTO, SneakersViewRelationDTO
 
 sneakers_data = [
     {
@@ -64,6 +65,7 @@ sizes_sneaker_data = [
 ]
 
 
+
 class SyncOrm:
    
    @staticmethod
@@ -102,7 +104,7 @@ class SyncOrm:
       session.commit()
       
    @staticmethod
-   def selectProductCard():
+   def selectProductCards():
       with session_factory() as session:
          
          query = select(SneakersOrm)
@@ -111,16 +113,16 @@ class SyncOrm:
          sneakers = result.scalars().all()
          # print(f"{sneakers}")
          
-         result_dto = [SneakerProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
       
          # print(f"{result_dto=}")
          return result_dto
-   
    
    # полные данные об одной карточке - страница товара 
    @staticmethod
    def selectProductInfo(id):
       with session_factory() as session:
+         
          query = (
             select(SneakersOrm)
             .options(selectinload(SneakersOrm.images))
@@ -137,6 +139,71 @@ class SyncOrm:
          # print(f"{result_dto=}")
          return result_dto
 
+   # запрос на 4 самые новые товара кроссовок для начального 
+   @staticmethod
+   def selectNewSneakers():
+      with session_factory() as session:
+         
+         query = (
+            select(SneakersOrm)
+            .order_by(SneakersOrm.updated_at.desc())
+            .limit(4)
+         )
+         
+         result = session.execute(query)
+         sneakers = result.scalars().all()
+         resultDTO = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         return resultDTO
+      
+      
+   @staticmethod
+   def selectProductCardsWithFilters(filters: FilterModelDTO):
+      with session_factory() as session:
+         
+         
+         brands = filters.brands
+         available = filters.available
+         price = filters.price
+         sizes = filters.sizes
+         sorted = filters.sorted
+         
+         query = (
+            select(SneakersOrm).distinct()
+            .join(SneakerSizesOrm, SneakerSizesOrm.sneaker_id == SneakersOrm.id, isouter=True)
+            .join(ImagesOrm, ImagesOrm.sneaker_id == SneakersOrm.id, isouter=True)
+            )
+         
+         if price:
+            query = query.filter(SneakersOrm.price >= price.min)
+            query = query.filter(SneakersOrm.price <= price.max)
+
+         if brands:
+            query = query.filter(SneakersOrm.brand.in_(brands))
+
+         if available:
+            query = query.filter(SneakersOrm.available.in_(available))
+            
+         if sizes:
+            query = query.filter(SneakerSizesOrm.ru.in_(sizes))
+         
+         match sorted:
+               case "default":
+                  query 
+               case "new":
+                  query = query.order_by(SneakersOrm.updated_at.desc())
+               case "price-asc":
+                  query = query.order_by(SneakersOrm.price.asc())
+               case "price-desc":
+                  query = query.order_by(SneakersOrm.price.desc())
+               case _:
+                  query
+
+         # print(query)
+         result = session.execute(query)
+         sneakers = result.scalars().all()
+         
+         result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         return result_dto
 
 
 
