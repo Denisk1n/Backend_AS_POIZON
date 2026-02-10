@@ -73,3 +73,25 @@ class SneakerSizesOrm(Base):
       back_populates="sizes"
    )
    
+
+class AllSneakerSizes(Base):
+   __tablename__ = "allsizes"
+   id: Mapped[intpk]
+   ru: Mapped[float]
+   us: Mapped[float]
+   sm: Mapped[float]
+   
+   created_at: Mapped[created_at]
+   updated_at: Mapped[created_at]
+   
+
+class AllBrands(Base):
+   __tablename__ = "allbrands"
+   id: Mapped[intpk]
+   brand: Mapped[str]
+
+   created_at: Mapped[created_at]
+   updated_at: Mapped[created_at]
+   
+
+   

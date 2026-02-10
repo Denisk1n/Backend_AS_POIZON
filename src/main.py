@@ -21,7 +21,7 @@ def post_ProductCardsApplyingFilters(filters: FilterModelDTO):
    result = SyncOrm.selectProductCardsWithFilters(filters)
    return result
 
-@app.get("/sneakers", summary="Все карточки товара")
+@app.get("/sneakers", summary="Все карточки товара", response_model=list[ProductCardDTO])
 def get_AllSneakerCards():
    return SyncOrm.selectProductCards()
 
@@ -36,6 +36,9 @@ def get_NewSneakerCards():
    return SyncOrm.selectNewSneakers()   
 
 
+@app.get("/recomended-sneakers", summary="Получение 8 рандмных карточек", response_model=list[ProductCardDTO])
+def get_RecomendedSneakers():
+   return SyncOrm.selectRecomendedSneakers()
 
 
 if __name__ == "__main__":

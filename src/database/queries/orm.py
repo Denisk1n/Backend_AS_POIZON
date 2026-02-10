@@ -3,7 +3,7 @@ from sqlalchemy import Integer, and_, or_, func, text, insert, select, update
 from sqlalchemy.orm import aliased, joinedload, selectinload, join
 from database.models import Base, SneakersOrm, ImagesOrm, SneakerSizesOrm
 from schemas.filtersmodel import FilterModelDTO
-from schemas.productcardmodel import ProductCardDTO, SneakersRelationDTO, SneakersViewRelationDTO
+from schemas.productcardmodel import ProductCardDTO, SneakersRelationDTO, SneakersViewRelationDTO, ImageViewDTO
 
 sneakers_data = [
     {
@@ -132,11 +132,12 @@ class SyncOrm:
 
          result = session.execute(query)
          sneaker = result.scalars().one()
-         # print(f"{sneakers}")
+         # print(f"{sneaker}")
          
          result_dto = SneakersViewRelationDTO.model_validate(sneaker, from_attributes=True) 
-      
-         # print(f"{result_dto=}")
+         
+         # result_dto.images.append(ImageViewDTO(image=f"{result_dto.main_image}", position=0))
+         # print(f"{result_dto.images}")
          return result_dto
 
    # запрос на 4 самые новые товара кроссовок для начального 
@@ -155,11 +156,10 @@ class SyncOrm:
          resultDTO = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return resultDTO
       
-      
+   # в зависимости от фильтров отдаем карточки товаров 
    @staticmethod
    def selectProductCardsWithFilters(filters: FilterModelDTO):
       with session_factory() as session:
-         
          
          brands = filters.brands
          available = filters.available
@@ -205,6 +205,22 @@ class SyncOrm:
          result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return result_dto
 
+   # 
+   @staticmethod
+   def selectRecomendedSneakers():
+      with session_factory() as session:
+         
+         query = (
+            select(SneakersOrm)
+            .order_by(func.random())
+            .limit(2)
+         )
+         
+         result = session.execute(query)
+         sneakers = result.scalars().all()
+         
+         result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         return result_dto
 
 
 

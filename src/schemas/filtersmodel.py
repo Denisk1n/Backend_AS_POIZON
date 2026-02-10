@@ -1,12 +1,6 @@
 from typing import Optional, Literal
 from pydantic import BaseModel
 from enum import Enum
-
-class Sorted_by(Enum):
-   default = "default"
-   asc = "asc"
-   desc = "desc"
-   new = "new"
    
 
 class FilterModelDTO(BaseModel):
