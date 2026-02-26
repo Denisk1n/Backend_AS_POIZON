@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
+from typing import Optional
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from schemas.filtersmodel import FilterModelDTO
@@ -39,6 +40,11 @@ def get_NewSneakerCards():
 @app.get("/recomended-sneakers", summary="Получение 8 рандмных карточек", response_model=list[ProductCardDTO])
 def get_RecomendedSneakers():
    return SyncOrm.selectRecomendedSneakers()
+
+
+@app.get("/used-brands")
+def get_UsedBrands(): 
+   return SyncOrm.getUsedBrands()
 
 
 if __name__ == "__main__":

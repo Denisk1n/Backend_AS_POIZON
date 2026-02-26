@@ -1,4 +1,6 @@
 from database.engine_db import sync_engine, session_factory
+from fastapi import Query
+from typing import Optional
 from sqlalchemy import Integer, and_, or_, func, text, insert, select, update
 from sqlalchemy.orm import aliased, joinedload, selectinload, join
 from database.models import Base, SneakersOrm, ImagesOrm, SneakerSizesOrm
@@ -222,8 +224,19 @@ class SyncOrm:
          result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return result_dto
 
-
-
-
-
+   @staticmethod
+   def getUsedBrands():
+      with session_factory() as session:
          
+         query = (
+            select(SneakersOrm.brand)
+            .distinct(SneakersOrm.brand)
+         )
+         
+         result = session.execute(query)
+         brands = result.scalars().all()
+         
+         res = [ {"label": brand, "value": brand} for brand in brands ]
+         
+         return res
+      
