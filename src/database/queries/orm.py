@@ -142,6 +142,7 @@ class SyncOrm:
          # print(f"{result_dto.images}")
          return result_dto
 
+
    # запрос на 4 самые новые товара кроссовок для начального 
    @staticmethod
    def selectNewSneakers():
@@ -207,7 +208,7 @@ class SyncOrm:
          result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return result_dto
 
-   # 
+   # рекомендуемые кроссовки 
    @staticmethod
    def selectRecomendedSneakers():
       with session_factory() as session:
@@ -224,6 +225,8 @@ class SyncOrm:
          result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return result_dto
 
+
+   # использованные бренды
    @staticmethod
    def getUsedBrands():
       with session_factory() as session:

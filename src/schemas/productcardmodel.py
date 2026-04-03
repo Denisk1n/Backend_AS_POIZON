@@ -27,7 +27,9 @@ class SneakersRelationDTO(SneakersPostDTO):
    images: list["ImagesDTO"]
    sizes: list["SneakerSizesDTO"]
 
+
 class SneakersViewRelationDTO(SneakersPostDTO):
+   description: str
    images: list["ImageViewDTO"]
    sizes: list["SneakerSizesViewDTO"]
    
