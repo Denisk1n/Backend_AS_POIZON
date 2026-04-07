@@ -47,5 +47,12 @@ def get_UsedBrands():
    return SyncOrm.getUsedBrands()
 
 
+@app.get("/static-data")
+def get_staticData():
+   return SyncOrm.getStaticData()
+
+
+
+
 if __name__ == "__main__":
    uvicorn.run("main:app",reload=True)

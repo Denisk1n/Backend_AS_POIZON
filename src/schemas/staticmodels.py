@@ -10,9 +10,9 @@ class BrandsDTO(BaseModel):
    brand: str
    
    
-class StaticDataDTO(AllSneakerSizesDTO, BrandsDTO):
-   sneakerSizes = list["AllSneakerSizesDTO"]
-   brands = list["BrandsDTO"]
+class StaticDataDTO(BaseModel):
+   sneakerSizes: list["AllSneakerSizesDTO"]
+   brands: list["BrandsDTO"]
 
 
 

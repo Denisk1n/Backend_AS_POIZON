@@ -19,3 +19,4 @@ from database.queries.orm import SyncOrm
 
 #SyncOrm.selectProductCardsWithFilters()
 
+#SyncOrm.insert_static_data()
