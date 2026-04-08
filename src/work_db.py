@@ -1,22 +1,23 @@
 import sys
 import os
 from datetime import datetime
-import math
+import asyncio
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
-from database.queries.orm import SyncOrm
+from database.queries.orm import AsyncOrm
 
 
-# SyncOrm.create_tables()
+#SyncOrm.create_tables()
 
 
-# SyncOrm.insert_test_data()
+#asyncio.run(SyncOrm.insert_test_data())
 
 
-# SyncOrm.selectProductCard()
+#asyncio.run(SyncOrm.selectProductCards())
 
 # SyncOrm.selectProductInfo()
 
 #SyncOrm.selectProductCardsWithFilters()
 
-#SyncOrm.insert_static_data()
+
+#asyncio.run(SyncOrm.insert_static_data())

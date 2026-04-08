@@ -1,4 +1,4 @@
-from database.engine_db import sync_engine, session_factory
+from database.engine_db import sync_engine, session_factory, async_engine, async_session_factory
 from fastapi import Query
 from typing import Optional
 from sqlalchemy import Integer, and_, or_, func, text, insert, select, update
@@ -186,26 +186,34 @@ all_brands = [
     {"brand": "Ecco"},
     {"brand": "Geox"},
 ]
-class SyncOrm:
+
+
+class AsyncOrm:
    
    @staticmethod
-   def create_tables():
-      sync_engine.echo = True
-      Base.metadata.drop_all(sync_engine)
-      Base.metadata.create_all(sync_engine)
+   async def create_tables():
+      
+      async_engine.echo = True
+      
+      async with async_engine.begin() as conn:
+         
+         await conn.run_sync(Base.metadata.drop_all())
+         await conn.run_sync(Base.metadata.create_all())
+
       sync_engine.echo = False
+      print("Таблицы успешно созданы")
 
 
    @staticmethod
-   def insert_test_data():
-      with session_factory() as session:
+   async def insert_test_data():
+      async with async_session_factory() as session:
          sneakers = []
          for sn in sneakers_data:
             sneaker = SneakersOrm(**sn)
             sneakers.append(sneaker)
       
       session.add_all(sneakers)
-      session.commit()
+      await session.commit()
     
       # Добавляем фотографии
       images_instances = []
@@ -222,45 +230,47 @@ class SyncOrm:
          sizes_instances.append(size_instance)
       
       session.add_all(sizes_instances)
-      session.commit()
+      
+      await session.commit()
       
    
    @staticmethod
-   def insert_static_data():
-      with session_factory() as session:
+   async def insert_static_data():
+      async with async_session_factory() as session:
          
          sizes = [AllSneakerSizes(**size) for size in all_sizes]
          brands = [AllBrands(**brand) for brand in all_brands]
          
          session.add_all(sizes)
          session.add_all(brands)
-         
-         session.commit()
-         
+
          print(f"Добавленно: {len(sizes)} размеров и {len(brands)} брендов" )
          
-   
-   
+         await session.commit()
+         
+         
+         
    @staticmethod
-   def selectProductCards():
-      with session_factory() as session:
+   async def selectProductCards():
+      async with async_session_factory() as session:
          
          query = select(SneakersOrm)
 
-         result = session.execute(query)
+         result = await session.execute(query)
          sneakers = result.scalars().all()
-         # print(f"{sneakers}")
+         
+         print(f"{sneakers}")
          
          result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
       
-         # print(f"{result_dto=}")
+         print(f"{result_dto=}")
          return result_dto
    
    
    # полные данные об одной карточке - страница товара 
    @staticmethod
-   def selectProductInfo(id):
-      with session_factory() as session:
+   async def selectProductInfo(id):
+      async with async_session_factory() as session:
          
          query = (
             select(SneakersOrm)
@@ -269,7 +279,7 @@ class SyncOrm:
             .where(SneakersOrm.id == id)
          )
 
-         result = session.execute(query)
+         result = await session.execute(query)
          sneaker = result.scalars().one()
          # print(f"{sneaker}")
          
@@ -282,8 +292,8 @@ class SyncOrm:
 
    # запрос на 4 самые новые товара кроссовок для начального 
    @staticmethod
-   def selectNewSneakers():
-      with session_factory() as session:
+   async def selectNewSneakers():
+      async with async_session_factory() as session:
          
          query = (
             select(SneakersOrm)
@@ -291,7 +301,7 @@ class SyncOrm:
             .limit(4)
          )
          
-         result = session.execute(query)
+         result = await session.execute(query)
          sneakers = result.scalars().all()
          resultDTO = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return resultDTO
@@ -299,8 +309,8 @@ class SyncOrm:
       
    # в зависимости от фильтров отдаем карточки товаров 
    @staticmethod
-   def selectProductCardsWithFilters(filters: FilterModelDTO):
-      with session_factory() as session:
+   async def selectProductCardsWithFilters(filters: FilterModelDTO):
+      async with async_session_factory() as session:
          
          brands = filters.brands
          available = filters.available
@@ -328,7 +338,7 @@ class SyncOrm:
             query = query.filter(SneakerSizesOrm.ru.in_(sizes))
          
          match sorted:
-               case "default":
+               case "async default":
                   query 
                case "new":
                   query = query.order_by(SneakersOrm.updated_at.desc())
@@ -340,7 +350,7 @@ class SyncOrm:
                   query
 
          # print(query)
-         result = session.execute(query)
+         result = await session.execute(query)
          sneakers = result.scalars().all()
          
          result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
@@ -349,8 +359,8 @@ class SyncOrm:
 
    # рекомендуемые кроссовки 
    @staticmethod
-   def selectRecomendedSneakers():
-      with session_factory() as session:
+   async def selectRecomendedSneakers():
+      async with async_session_factory() as session:
          
          query = (
             select(SneakersOrm)
@@ -358,7 +368,7 @@ class SyncOrm:
             .limit(2)
          )
          
-         result = session.execute(query)
+         result = await session.execute(query)
          sneakers = result.scalars().all()
          
          result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
@@ -367,15 +377,15 @@ class SyncOrm:
 
    # использованные бренды
    @staticmethod
-   def getUsedBrands():
-      with session_factory() as session:
+   async def getUsedBrands():
+      async with async_session_factory() as session:
          
          query = (
             select(SneakersOrm.brand)
             .distinct(SneakersOrm.brand)
          )
          
-         result = session.execute(query)
+         result = await session.execute(query)
          brands = result.scalars().all()
          
          res = [ {"label": brand, "value": brand} for brand in brands ]
@@ -385,12 +395,12 @@ class SyncOrm:
    
    # статические данные
    @staticmethod 
-   def getStaticData():
-      with session_factory() as session:
+   async def getStaticData():
+      async with async_session_factory() as session:
          
          
-         sizes_query = session.execute(select(AllSneakerSizes))
-         brands_query = session.execute(select(AllBrands))
+         sizes_query = await session.execute(select(AllSneakerSizes))
+         brands_query = await session.execute(select(AllBrands))
          
          sizes = sizes_query.scalars().all()
          brands = brands_query.scalars().all()
