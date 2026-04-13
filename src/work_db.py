@@ -7,10 +7,10 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from database.queries.orm import AsyncOrm
 
 
-#SyncOrm.create_tables()
+# asyncio.run(AsyncOrm.create_tables())
 
 
-#asyncio.run(SyncOrm.insert_test_data())
+# asyncio.run(AsyncOrm.insert_test_data())
 
 
 #asyncio.run(SyncOrm.selectProductCards())
@@ -20,4 +20,4 @@ from database.queries.orm import AsyncOrm
 #SyncOrm.selectProductCardsWithFilters()
 
 
-#asyncio.run(SyncOrm.insert_static_data())
+asyncio.run(AsyncOrm.insert_static_data())

@@ -5,7 +5,7 @@ from sqlalchemy import Integer, and_, or_, func, text, insert, select, update
 from sqlalchemy.orm import aliased, joinedload, selectinload, join
 from database.models import Base, SneakersOrm, ImagesOrm, SneakerSizesOrm, AllSneakerSizes, AllBrands
 from schemas.filtersmodel import FilterModelDTO
-from schemas.productcardmodel import ProductCardDTO, SneakersRelationDTO, SneakersViewRelationDTO, ImageViewDTO
+import schemas.productcardmodel as DTO
 from schemas.staticmodels import StaticDataDTO, AllSneakerSizesDTO, BrandsDTO
 
 sneakers_data = [
@@ -67,26 +67,39 @@ sizes_sneaker_data = [
     { "sneaker_id": 3, "ru": 42, "us": 9, "sm": 27}
 ]
 
-all_sizes = [
-    {"ru": 37.5, "us": 5, "sm": 22.9},
-    {"ru": 38, "us": 5.5, "sm": 23.3},
-    {"ru": 38.5, "us": 6, "sm": 23.8},
-    {"ru": 39, "us": 6.5, "sm": 24.2},
-    {"ru": 39.5, "us": 7, "sm": 24.6},
-    {"ru": 40, "us": 7.5, "sm": 25.0},
-    {"ru": 41, "us": 8, "sm": 25.5},
-    {"ru": 41.5, "us": 8.5, "sm": 26.0},
-    {"ru": 42, "us": 9, "sm": 26.3},
-    {"ru": 43, "us": 9.5, "sm": 26.7},
-    {"ru": 43.5, "us": 10, "sm": 27.1},
-    {"ru": 44, "us": 10.5, "sm": 27.6},
-    {"ru": 45, "us": 11, "sm": 28.0},
-    {"ru": 45.5, "us": 11.5, "sm": 28.4},
-    {"ru": 46, "us": 12, "sm": 28.8},
-    {"ru": 47, "us": 12.5, "sm": 29.3},
-    {"ru": 47.5, "us": 13, "sm": 29.7},
-    {"ru": 48, "us": 13.5, "sm": 30.1},
-    {"ru": 49, "us": 14, "sm": 30.5},
+all_sizes = [ 
+  {"ru": 31.5, "us": 1, "sm": 19},
+  {"ru": 32, "us": 1.5, "sm": 19.5},
+  {"ru": 32.5, "us": 2, "sm": 20},
+  {"ru": 33.5, "us": 2.5, "sm": 20.5},
+  {"ru": 34, "us": 3, "sm": 21},
+  {"ru": 34.5, "us": 3.5, "sm": 21.5},
+  {"ru": 35, "us": 4, "sm": 22},
+  {"ru": 36, "us": 4.5, "sm": 22.5},
+  {"ru": 36.5, "us": 5, "sm": 23},
+  {"ru": 37, "us": 5.5, "sm": 23.5},
+  {"ru": 37.5, "us": 6, "sm": 24},
+  {"ru": 38.5, "us": 6.5, "sm": 24.5},
+  {"ru": 39, "us": 7, "sm": 25},
+  {"ru": 39.5, "us": 7.5, "sm": 25.5},
+  {"ru": 40.5, "us": 8, "sm": 26},
+  {"ru": 41, "us": 8.5, "sm": 26.5},
+  {"ru": 41.5, "us": 9, "sm": 27},
+  {"ru": 42, "us": 9.5, "sm": 27.5},
+  {"ru": 43, "us": 10, "sm": 28},
+  {"ru": 43.5, "us": 10.5, "sm": 28.5},
+  {"ru": 44, "us": 11, "sm": 29},
+  {"ru": 44.5, "us": 11.5, "sm": 29.5},
+  {"ru": 45.5, "us": 12, "sm": 30},
+  {"ru": 46, "us": 12.5, "sm": 30.5},
+  {"ru": 46.5, "us": 13, "sm": 31},
+  {"ru": 48, "us": 14, "sm": 32},
+  {"ru": 49, "us": 15, "sm": 33},
+  {"ru": 50, "us": 16, "sm": 34},
+  {"ru": 51, "us": 17, "sm": 35},
+  {"ru": 52, "us": 18, "sm": 36},
+  {"ru": 53, "us": 19, "sm": 37},
+  {"ru": 54, "us": 20, "sm": 38}
 ]
 
 all_brands = [
@@ -197,10 +210,10 @@ class AsyncOrm:
       
       async with async_engine.begin() as conn:
          
-         await conn.run_sync(Base.metadata.drop_all())
-         await conn.run_sync(Base.metadata.create_all())
+         await conn.run_sync(lambda sync_conn: Base.metadata.drop_all(sync_conn))
+         await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn))
 
-      sync_engine.echo = False
+      async_engine.echo = False
       print("Таблицы успешно созданы")
 
 
@@ -247,8 +260,7 @@ class AsyncOrm:
          print(f"Добавленно: {len(sizes)} размеров и {len(brands)} брендов" )
          
          await session.commit()
-         
-         
+             
          
    @staticmethod
    async def selectProductCards():
@@ -259,11 +271,11 @@ class AsyncOrm:
          result = await session.execute(query)
          sneakers = result.scalars().all()
          
-         print(f"{sneakers}")
+         # print(f"{sneakers}")
          
-         result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         result_dto = [DTO.ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
       
-         print(f"{result_dto=}")
+         # print(f"{result_dto=}")
          return result_dto
    
    
@@ -274,8 +286,8 @@ class AsyncOrm:
          
          query = (
             select(SneakersOrm)
-            .options(selectinload(SneakersOrm.images))
-            .options(selectinload(SneakersOrm.sizes))
+            .options(selectinload(SneakersOrm.images),
+                     selectinload(SneakersOrm.sizes))
             .where(SneakersOrm.id == id)
          )
 
@@ -283,7 +295,7 @@ class AsyncOrm:
          sneaker = result.scalars().one()
          # print(f"{sneaker}")
          
-         result_dto = SneakersViewRelationDTO.model_validate(sneaker, from_attributes=True) 
+         result_dto = DTO.ProductPostDTO.model_validate(sneaker, from_attributes=True) 
          
          # result_dto.images.append(ImageViewDTO(image=f"{result_dto.main_image}", position=0))
          # print(f"{result_dto.images}")
@@ -303,7 +315,7 @@ class AsyncOrm:
          
          result = await session.execute(query)
          sneakers = result.scalars().all()
-         resultDTO = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         resultDTO = [DTO.ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return resultDTO
       
       
@@ -353,7 +365,7 @@ class AsyncOrm:
          result = await session.execute(query)
          sneakers = result.scalars().all()
          
-         result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         result_dto = [DTO.ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return result_dto
 
 
@@ -371,7 +383,7 @@ class AsyncOrm:
          result = await session.execute(query)
          sneakers = result.scalars().all()
          
-         result_dto = [ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
+         result_dto = [DTO.ProductCardDTO.model_validate(row, from_attributes=True) for row in sneakers]
          return result_dto
 
 
@@ -398,7 +410,6 @@ class AsyncOrm:
    async def getStaticData():
       async with async_session_factory() as session:
          
-         
          sizes_query = await session.execute(select(AllSneakerSizes))
          brands_query = await session.execute(select(AllBrands))
          
@@ -412,4 +423,55 @@ class AsyncOrm:
          return StaticDataDTO(
             sneakerSizes= sizes_dto,
             brands= brands_dto
+   )
+         
+         
+   @staticmethod
+   async def postCreateNewProdoct(new_pr: DTO.ProductPostDTO):
+      async with async_session_factory() as session:
+         
+         new_product = new_pr.model_dump(exclude={'images', 'sizes'})
+         
+         print(new_product)
+         product = SneakersOrm(**new_product)
+         
+         session.add(product)
+         
+         await session.flush()
+         
+         new_product_id = product.id
+         
+         if new_pr.images:
+            
+            for img in new_pr.images:
+               img_data = img.model_dump() 
+               
+               image = ImagesOrm(sneaker_id=new_product_id, **img_data)
+               session.add(image)
+         
+         if new_pr.sizes:
+            
+            for s in new_pr.sizes:
+               size_data = s.model_dump()
+               
+               size = SneakerSizesOrm(sneaker_id=new_product_id, **size_data)
+               session.add(size)
+         
+         await session.commit()
+         
+         query = (
+            select(SneakersOrm)
+            .options(selectinload(SneakersOrm.images))
+            .options(selectinload(SneakersOrm.sizes))
+            .where(SneakersOrm.id == new_product_id)
          )
+         
+         result = await session.execute(query)
+         prod = result.scalar_one()
+         
+         result_dto = DTO.ProductWithIdDTO.model_validate(prod, from_attributes=True)
+         return result_dto
+               
+         
+         
+         

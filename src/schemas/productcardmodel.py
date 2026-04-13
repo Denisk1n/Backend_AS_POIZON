@@ -11,11 +11,10 @@ class SneakersPostDTO(BaseModel):
    main_image: str
    available: Literal["В наличии", "Под заказ"]
   
+  
 class ProductCardDTO(SneakersPostDTO):
    id: int
-   
-class SneakersDTO(SneakersPostDTO):
-   id: int    
+    
 
 class SneakersCreatedDTO(SneakersPostDTO):
    id: Optional[int] = None
@@ -28,23 +27,34 @@ class SneakersRelationDTO(SneakersPostDTO):
    sizes: list["SneakerSizesDTO"]
 
 
-class SneakersViewRelationDTO(SneakersPostDTO):
+class ProductPostDTO(SneakersPostDTO):
    description: str
    images: list["ImageViewDTO"]
    sizes: list["SneakerSizesViewDTO"]
    
+
    
+
+class ProductWithIdDTO(SneakersPostDTO):
+   id: int
+   description: str
+   images: list["ImageViewDTO"]
+   sizes: list["SneakerSizesViewDTO"]
+
+
    
 # для добавления одной фотографии
 class ImagesPostDTO(BaseModel):
    sneaker_id: int
    image: str
    position: int
+   delete: bool
    
 # для просмотра на фронте
 class ImageViewDTO(BaseModel):
    image: str
    position: int
+   delete: bool
    
 class ImagesDTO(ImagesPostDTO):
    id: int
@@ -54,7 +64,7 @@ class ImagesCreatedDTO(ImagesPostDTO):
    updated_at: datetime = datetime.now()
    
 class ImagesRelationDTO(ImagesDTO):
-   sneaker: "SneakersDTO"
+   sneaker: "ProductCardDTO"
 
 
 
@@ -78,4 +88,4 @@ class SneakerSizesCreatedDTO(SneakerSizesPostDTO):
    updated_at: datetime = datetime.now()
    
 class SneakerSizesRelationDTO(SneakerSizesDTO):
-   sneaker: "SneakersDTO"
+   sneaker: "ProductCardDTO"

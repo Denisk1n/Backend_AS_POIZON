@@ -4,7 +4,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from schemas.filtersmodel import FilterModelDTO
 from database.queries.orm import AsyncOrm
-from schemas.productcardmodel import ProductCardDTO
+import schemas.productcardmodel as DTO
 
 app = FastAPI()
 
@@ -18,13 +18,13 @@ app.add_middleware(
 
 @app.post("/sneakers_with_filters", 
           summary="Получаем фильтры с фронта и отдаем по этим фильтрам товары", 
-          response_model=list[ProductCardDTO])
+          response_model=list[DTO.ProductCardDTO])
 async def post_ProductCardsApplyingFilters(filters: FilterModelDTO):
    #print(filters)
    result = await AsyncOrm.selectProductCardsWithFilters(filters)
    return result
 
-@app.get("/sneakers", summary="Все карточки товара", response_model=list[ProductCardDTO])
+@app.get("/sneakers", summary="Все карточки товара", response_model=list[DTO.ProductCardDTO])
 async def get_AllSneakerCards():
    result = await AsyncOrm.selectProductCards()
    return result
@@ -36,13 +36,15 @@ async def get_SneakerCard(id: int):
    return result 
 
 
-@app.get("/newsneakers", summary="Получение первых 4 карточек отсартированных по дате", response_model=list[ProductCardDTO])
+@app.get("/newsneakers", summary="Получение первых 4 карточек отсартированных по дате", response_model=list[DTO.ProductCardDTO])
 async def get_NewSneakerCards():
    result = await AsyncOrm.selectNewSneakers()  
    return  result 
 
 
-@app.get("/recomended-sneakers", summary="Получение 8 рандмных карточек", response_model=list[ProductCardDTO])
+@app.get("/recomended-sneakers", 
+         summary="Получение 8 рандмных карточек", 
+         response_model=list[DTO.ProductCardDTO])
 async def get_RecomendedSneakers():
    result = await AsyncOrm.selectRecomendedSneakers()
    return result 
@@ -60,7 +62,15 @@ async def get_staticData():
    return result 
 
 
+@app.post("/create-new-product", 
+          summary="Создаем и возвращаем новый товар",
+          response_model=DTO.ProductWithIdDTO)
+async def post_CreateNewProduct(new_prod: DTO.ProductPostDTO):
+   result = await AsyncOrm.postCreateNewProdoct(new_pr=new_prod)
+   return result 
+   
 
 
 if __name__ == "__main__":
    uvicorn.run("main:app",reload=True)
+   

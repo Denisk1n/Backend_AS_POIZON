@@ -11,7 +11,7 @@ intpk = Annotated[int, mapped_column(primary_key=True)]
 intfk = Annotated[int, mapped_column(ForeignKey("sneakers.id", ondelete="CASCADE"))]
 created_at = Annotated[datetime.datetime, mapped_column(default=datetime.datetime.now())]
 updated_at = Annotated[datetime.datetime, mapped_column(default=datetime.datetime.now())]
-
+boolFalse = Annotated[bool, mapped_column(default=False)]
 
 # енумиратор 
 class Availability(enum.Enum):
@@ -49,6 +49,7 @@ class ImagesOrm(Base):
    sneaker_id: Mapped[intfk]
    position: Mapped[int]
    image: Mapped[str]
+   delete: Mapped[boolFalse]
    created_at: Mapped[created_at]
    updated_at: Mapped[created_at]
    
